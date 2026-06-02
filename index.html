@@ -7,7 +7,7 @@
 <meta name="description" content="Você está convidado para o aniversário do Rafael!">
 <meta property="og:title" content="Aniversário do Rafael - 5 Anos 🚀">
 <meta property="og:description" content="Clique para abrir o convite!">
-<meta property="og:image" content="https://luconviteria.com.br/wp-content/uploads/2026/03/Copia-de-Copia-de-Pack-Toy-Story_20260317_205603_0000.png">
+<meta property="og:image" content="assets/capa.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -19,13 +19,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   aspect-ratio:1080/1850;
 }
 @supports(height:100dvh){.canvas{max-height:100dvh}}
-@media(max-aspect-ratio:1080/1850){
-  .canvas{width:100vw;height:auto}
-}
-@media(min-aspect-ratio:1080/1850){
-  .canvas{height:100vh;width:auto}
-  @supports(height:100dvh){.canvas{height:100dvh}}
-}
+@media(max-aspect-ratio:1080/1850){.canvas{width:100vw;height:auto}}
+@media(min-aspect-ratio:1080/1850){.canvas{height:100vh;width:auto}@supports(height:100dvh){.canvas{height:100dvh}}}
 
 #capa{
   position:fixed;inset:0;z-index:100;background:#000;
@@ -113,7 +108,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 
 <div id="capa">
   <div class="canvas">
-    <img src="https://luconviteria.com.br/wp-content/uploads/2026/03/Copia-de-Copia-de-Pack-Toy-Story_20260317_205603_0000.png" alt="Convite Rafael 5 Anos" decoding="async">
+    <img src="assets/capa.png" alt="Convite Rafael 5 Anos" decoding="async">
   </div>
   <div class="tap-overlay">
     <span class="tap-text">✨ Toque para abrir ✨</span>
@@ -123,7 +118,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 <div id="videoContainer">
   <div class="canvas">
     <video id="video" playsinline webkit-playsinline preload="auto">
-      <source src="https://luconviteria.com.br/wp-content/uploads/2026/05/copy_F09A4B3F-260E-4AB8-8899-3F0138545CA4.mov" type="video/mp4">
+      <source src="assets/video.mov" type="video/mp4">
     </video>
     <div id="botoes">
       <a href="https://forms.gle/nzumWp6gqjV2jWRC7" target="_blank" rel="noopener" aria-label="Confirmar presença"></a>
@@ -135,7 +130,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 
 <div id="overlay">
   <button class="close" aria-label="Fechar">×</button>
-  <img src="https://luconviteria.com.br/wp-content/uploads/2026/05/Toy-story-html-2.png" alt="Convite completo" decoding="async">
+  <img src="assets/convite.png" alt="Convite completo" decoding="async">
 </div>
 
 <button id="audioBtn" aria-label="Controlar música">🔊</button>
@@ -143,7 +138,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 
 <script>
 const capa=document.getElementById('capa'),videoContainer=document.getElementById('videoContainer'),video=document.getElementById('video'),botoes=document.getElementById('botoes'),overlay=document.getElementById('overlay'),audioBtn=document.getElementById('audioBtn');
-const musica=new Audio('https://luconviteria.com.br/wp-content/uploads/2026/03/Audio_2026_03_18_11_32_01.aac');
+const musica=new Audio('assets/musica.aac');
 musica.loop=true;musica.volume=0;let musicaAtiva=true;
 
 (function(){
