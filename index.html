@@ -26,7 +26,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 @media(max-aspect-ratio:1080/1850){.canvas{width:100vw;height:auto}}
 @media(min-aspect-ratio:1080/1850){.canvas{height:100vh;width:auto}@supports(height:100dvh){.canvas{height:100dvh}}}
 
-/* CAPA */
 #capa{
   position:fixed;inset:0;z-index:100;background:#000;
   display:flex;align-items:center;justify-content:center;
@@ -38,7 +37,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 }
 #capa .tap-overlay{
   position:absolute;inset:0;z-index:10;
-  display:flex;align-items:flex-end;justify-content:center;padding-bottom:8%;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding-bottom:6%;gap:0.8rem;
 }
 #capa .tap-text{
   color:#fff;font-size:clamp(0.8rem,3vw,1.1rem);font-weight:500;
@@ -46,10 +46,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);
   animation:pulse 2s infinite;
 }
+#countdown-capa{
+  color:#ffd700;font-size:clamp(0.7rem,2.5vw,0.95rem);font-weight:700;
+  background:rgba(0,0,0,0.6);padding:0.4rem 1.2rem;border-radius:20px;
+  backdrop-filter:blur(6px);border:1px solid rgba(255,215,0,0.3);
+  letter-spacing:0.5px;
+}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(0.97)}}
 .sparkle{position:absolute;width:4px;height:4px;background:#ffd700;border-radius:50%;pointer-events:none;opacity:0;z-index:5}
 
-/* LOADING */
 #loading{
   position:fixed;inset:0;z-index:150;background:#000;
   display:none;align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;
@@ -61,7 +66,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading p{color:#fff;font-size:0.9rem;opacity:0.7}
 
-/* VIDEO */
 #videoContainer{
   position:fixed;inset:0;z-index:50;background:#000;
   display:none;overflow:hidden;
@@ -71,7 +75,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   object-fit:contain;object-position:center;pointer-events:none;
 }
 
-/* BOTÕES */
 #botoes{position:absolute;inset:0;z-index:60;pointer-events:none}
 #botoes a{
   position:absolute;display:block;pointer-events:auto;
@@ -101,7 +104,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   50%{box-shadow:0 0 30px rgba(255,215,0,0.5),0 0 60px rgba(255,215,0,0.2)}
 }
 
-/* CTA HINT (instrução pós-vídeo) */
 #ctaHint{
   position:absolute;bottom:12%;left:50%;transform:translateX(-50%);
   z-index:70;pointer-events:none;opacity:0;
@@ -111,7 +113,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   white-space:nowrap;
 }
 
-/* OVERLAY */
 #overlay{
   position:fixed;inset:0;z-index:200;
   display:none;align-items:center;justify-content:center;
@@ -128,7 +129,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 }
 #overlay .close:hover{transform:scale(1.1)}
 
-/* AUDIO */
 #audioBtn{
   position:fixed;bottom:max(env(safe-area-inset-bottom,16px),16px);
   right:16px;z-index:300;width:44px;height:44px;
@@ -139,6 +139,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 #audioBtn:hover{transform:scale(1.1)}
 
 #confetti{position:fixed;inset:0;z-index:90;pointer-events:none}
+
+/* Explosion particles */
+.explosion{position:fixed;inset:0;z-index:110;pointer-events:none}
+.exp-particle{position:absolute;border-radius:50%;pointer-events:none}
 </style>
 </head>
 <body>
@@ -148,6 +152,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
     <img src="assets/capa.png" alt="Convite Rafael 5 Anos" decoding="async">
   </div>
   <div class="tap-overlay">
+    <div id="countdown-capa"></div>
     <span class="tap-text">✨ Toque para abrir ✨</span>
   </div>
 </div>
@@ -178,20 +183,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 
 <button id="audioBtn" aria-label="Controlar música">🔊</button>
 <canvas id="confetti"></canvas>
+<div class="explosion" id="explosion"></div>
 
 <script>
-const capa=document.getElementById('capa'),loading=document.getElementById('loading'),videoContainer=document.getElementById('videoContainer'),video=document.getElementById('video'),botoes=document.getElementById('botoes'),overlay=document.getElementById('overlay'),audioBtn=document.getElementById('audioBtn'),ctaHint=document.getElementById('ctaHint');
+const capa=document.getElementById('capa'),loading=document.getElementById('loading'),videoContainer=document.getElementById('videoContainer'),video=document.getElementById('video'),botoes=document.getElementById('botoes'),overlay=document.getElementById('overlay'),audioBtn=document.getElementById('audioBtn'),ctaHint=document.getElementById('ctaHint'),explosion=document.getElementById('explosion');
 const musica=new Audio('assets/musica.aac');
 musica.loop=true;musica.volume=0;let musicaAtiva=true;
 
-// Sparkles
+// === COUNTDOWN NA CAPA ===
+function updateCapaCountdown(){
+  const t=new Date('2026-07-05T13:00:00-03:00')-new Date();
+  const el=document.getElementById('countdown-capa');
+  if(t<=0){el.textContent='🎉 É HOJE! 🎉';return}
+  const d=Math.floor(t/864e5),h=Math.floor(t%864e5/36e5),m=Math.floor(t%36e5/6e4);
+  el.textContent=`⏰ Faltam ${d} dias, ${h}h e ${m}min!`;
+}
+updateCapaCountdown();setInterval(updateCapaCountdown,60000);
+
+// === SPARKLES ===
 (function(){
-  for(let i=0;i<20;i++){
+  for(let i=0;i<25;i++){
     const s=document.createElement('div');s.className='sparkle';
     s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
     capa.querySelector('.canvas').appendChild(s);
     gsap.to(s,{opacity:1,scale:2,duration:0.6,repeat:-1,yoyo:true,delay:Math.random()*3,ease:'power1.inOut'});
-    gsap.to(s,{x:()=>(Math.random()-0.5)*30,y:()=>(Math.random()-0.5)*30,duration:3+Math.random()*2,repeat:-1,yoyo:true,ease:'sine.inOut'});
+    gsap.to(s,{x:()=>(Math.random()-0.5)*40,y:()=>(Math.random()-0.5)*40,duration:3+Math.random()*2,repeat:-1,yoyo:true,ease:'sine.inOut'});
   }
 })();
 
@@ -203,24 +219,48 @@ video.play().then(()=>{video.pause();video.currentTime=0}).catch(()=>{});
 capa.addEventListener('click',async()=>{
   try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){const ctx=new AC();await ctx.resume()}}catch(_){}
 
+  // Vibração tátil
+  if(navigator.vibrate)navigator.vibrate([50,30,100]);
+
+  // Explosão de partículas da capa
+  explodeParticles();
+
   const tl=gsap.timeline();
-  tl.to('.tap-text',{opacity:0,y:20,duration:0.3})
-    .to('.sparkle',{opacity:0,scale:0,duration:0.3,stagger:0.02},'<')
-    .to(capa,{scale:1.1,opacity:0,duration:0.6,ease:'power2.in',onComplete:()=>{
+  tl.to('.tap-text',{opacity:0,y:20,duration:0.2})
+    .to('#countdown-capa',{opacity:0,y:20,duration:0.2},'<')
+    .to('.sparkle',{scale:4,opacity:0,duration:0.5,stagger:0.01,ease:'power2.out'},'<')
+    .to('#capa .canvas img',{scale:1.2,duration:0.6,ease:'power2.in'},'<0.1')
+    .to(capa,{opacity:0,duration:0.4,onComplete:()=>{
       capa.style.display='none';
       startVideo();
-    }});
+    }},'<0.3');
 });
 
+// === EXPLOSÃO DE PARTÍCULAS NA TRANSIÇÃO ===
+function explodeParticles(){
+  const colors=['#ffd700','#ff9800','#e53935','#4caf50','#2196f3','#9c27b0','#fff'];
+  for(let i=0;i<40;i++){
+    const p=document.createElement('div');
+    p.className='exp-particle';
+    const size=Math.random()*8+4;
+    p.style.cssText=`width:${size}px;height:${size}px;background:${colors[i%colors.length]};left:50%;top:50%;`;
+    explosion.appendChild(p);
+    const angle=Math.random()*Math.PI*2;
+    const dist=Math.random()*Math.max(innerWidth,innerHeight)*0.7;
+    gsap.to(p,{
+      x:Math.cos(angle)*dist,y:Math.sin(angle)*dist,
+      opacity:0,scale:0,duration:1+Math.random()*0.5,
+      ease:'power2.out',
+      onComplete:()=>p.remove()
+    });
+  }
+}
+
 async function startVideo(){
-  // Mostrar loading se vídeo não tá pronto
-  const ready = video.readyState >= 3; // HAVE_FUTURE_DATA
+  const ready=video.readyState>=3;
   if(!ready){
     loading.style.display='flex';
-    await new Promise(r=>{
-      video.addEventListener('canplay',r,{once:true});
-      setTimeout(r,8000); // timeout 8s: fallback
-    });
+    await new Promise(r=>{video.addEventListener('canplay',r,{once:true});setTimeout(r,8000)});
     gsap.to(loading,{opacity:0,duration:0.3,onComplete:()=>loading.style.display='none'});
   }
 
@@ -229,38 +269,53 @@ async function startVideo(){
 
   try{await video.play()}catch{
     video.muted=true;
-    try{await video.play()}catch(_){
-      // Fallback: video não toca de jeito nenhum — mostra último frame
-      video.currentTime=video.duration||0;
-      showButtons();
-    }
+    try{await video.play()}catch(_){video.currentTime=video.duration||0;showButtons()}
   }
 
   launchConfetti();
 
-  // Música
   try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}
   catch{musica.muted=true;musica.play().catch(()=>{})}
   audioBtn.style.display='block';gsap.from(audioBtn,{scale:0,duration:0.5,delay:1,ease:'back.out(2)'});
 
-  // Botões após vídeo terminar OU após timeout
   const showAfterVideo=()=>showButtons();
   video.addEventListener('ended',showAfterVideo,{once:true});
   video.addEventListener('pause',()=>{if(video.currentTime>0)showAfterVideo()},{once:true});
-  setTimeout(showAfterVideo,15000); // safety: max 15s
+  setTimeout(showAfterVideo,15000);
 }
 
 function showButtons(){
-  if(botoes.classList.contains('show'))return; // já mostrou
+  if(botoes.classList.contains('show'))return;
+
+  // Vibração ao mostrar botões
+  if(navigator.vibrate)navigator.vibrate([30,20,30]);
+
+  // Segundo confetti!
+  launchConfetti();
+
   const btns=botoes.querySelectorAll('a');
   gsap.to(btns,{
-    opacity:1,scale:1,duration:0.6,stagger:0.15,
-    ease:'elastic.out(1,0.5)',
+    opacity:1,scale:1,duration:0.7,stagger:0.2,
+    ease:'elastic.out(1.2,0.4)',
     onComplete:()=>{
       botoes.classList.add('show');
-      // CTA hint
       gsap.to(ctaHint,{opacity:1,duration:0.5,delay:0.5});
-      gsap.to(ctaHint,{opacity:0,duration:0.5,delay:4}); // desaparece após 4s
+      gsap.to(ctaHint,{opacity:0,duration:0.5,delay:5});
+    }
+  });
+}
+
+// === SHAKE EASTER EGG ===
+let lastShake=0;
+if(window.DeviceMotionEvent){
+  window.addEventListener('devicemotion',e=>{
+    const a=e.accelerationIncludingGravity;
+    if(!a)return;
+    const force=Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z);
+    if(force>35&&Date.now()-lastShake>2000){
+      lastShake=Date.now();
+      if(navigator.vibrate)navigator.vibrate(100);
+      launchConfetti();
     }
   });
 }
@@ -283,18 +338,26 @@ overlay.querySelector('.close').addEventListener('click',()=>{
 });
 overlay.addEventListener('click',(e)=>{if(e.target===overlay)overlay.querySelector('.close').click()});
 
-// Confetti
+// === CONFETTI ===
 function launchConfetti(){
   const c=document.getElementById('confetti'),ctx=c.getContext('2d');
   c.width=innerWidth;c.height=innerHeight;
-  const colors=['#ffd700','#e53935','#4caf50','#2196f3','#ff9800','#9c27b0','#00bcd4'],P=[];
-  for(let i=0;i<180;i++)P.push({x:c.width*0.5+(Math.random()-0.5)*c.width*0.3,y:c.height*0.4,vx:(Math.random()-0.5)*16,vy:Math.random()*-20-8,color:colors[i%colors.length],w:Math.random()*10+4,h:Math.random()*6+3,rot:Math.random()*360,rv:(Math.random()-0.5)*14,life:1});
+  const colors=['#ffd700','#e53935','#4caf50','#2196f3','#ff9800','#9c27b0','#00bcd4','#ff5722'],P=[];
+  for(let i=0;i<200;i++){
+    const angle=(Math.random()-0.5)*Math.PI;
+    P.push({x:c.width*0.5+(Math.random()-0.5)*c.width*0.2,y:c.height*0.5,
+      vx:Math.cos(angle)*(Math.random()*14+6),vy:Math.sin(angle)*(Math.random()*14+6)-12,
+      color:colors[i%colors.length],w:Math.random()*10+4,h:Math.random()*6+3,
+      rot:Math.random()*360,rv:(Math.random()-0.5)*15,life:1});
+  }
   let f=0;
   function draw(){
     ctx.clearRect(0,0,c.width,c.height);let alive=false;
-    P.forEach(p=>{p.vy+=0.45;p.x+=p.vx;p.y+=p.vy;p.vx*=0.985;p.rot+=p.rv;p.life-=0.0025;
-      if(p.life>0&&p.y<c.height+50){alive=true;ctx.save();ctx.globalAlpha=p.life;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}});
-    f++;if(alive&&f<350)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);
+    P.forEach(p=>{p.vy+=0.4;p.x+=p.vx;p.y+=p.vy;p.vx*=0.985;p.rot+=p.rv;p.life-=0.002;
+      if(p.life>0&&p.y<c.height+50){alive=true;ctx.save();ctx.globalAlpha=p.life;
+        ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
+        ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}});
+    f++;if(alive&&f<400)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);
   }
   draw();
 }
