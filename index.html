@@ -65,16 +65,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading p{color:#fff;font-size:0.9rem;opacity:0.7}
 
+/* Video: hidden until JS shows it */
 #videoContainer{
   position:fixed;inset:0;z-index:50;background:#000;
-  display:none;overflow:hidden;
+  display:none;
 }
 #videoContainer .canvas video{
   position:absolute;inset:0;width:100%!important;height:100%!important;
   object-fit:contain;object-position:center;pointer-events:none;
-  opacity:0;transition:opacity 0.3s;
 }
-#videoContainer .canvas video.visible{opacity:1}
 
 #botoes{position:absolute;inset:0;z-index:60;pointer-events:none}
 #botoes a{
@@ -88,7 +87,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 #botoes a:nth-child(2){left:37.6%;top:62.6%;width:11.9%;height:10%}
 #botoes a:nth-child(3){left:50.9%;top:62.6%;width:12%;height:10%}
 
-/* Glow + ripple SÓ quando .show é adicionado */
+/* Efeito nos botões: SÓ aparece com .show */
 #botoes a::before,#botoes a::after{
   content:'';position:absolute;inset:-6px;border-radius:16px;
   border:2px solid rgba(255,255,255,0.8);opacity:0;pointer-events:none;
@@ -187,7 +186,7 @@ musica.loop=true;musica.volume=0;
 let musicaAtiva=true;
 let buttonsShown=false;
 
-// Countdown na capa
+// Countdown
 function updateCountdown(){
   const t=new Date('2026-07-05T13:00:00-03:00')-new Date();
   const el=document.getElementById('countdown-capa');
@@ -197,7 +196,7 @@ function updateCountdown(){
 }
 updateCountdown();setInterval(updateCountdown,60000);
 
-// Sparkles na capa
+// Sparkles
 for(let i=0;i<25;i++){
   const s=document.createElement('div');s.className='sparkle';
   s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
@@ -206,11 +205,7 @@ for(let i=0;i<25;i++){
   gsap.to(s,{x:()=>(Math.random()-0.5)*40,y:()=>(Math.random()-0.5)*40,duration:3+Math.random()*2,repeat:-1,yoyo:true,ease:'sine.inOut'});
 }
 
-// Preload video (silencioso)
-video.muted=true;
-video.play().then(()=>{video.pause();video.currentTime=0}).catch(()=>{});
-
-// === ABRIR CONVITE ===
+// Abrir convite
 capa.addEventListener('click',async()=>{
   try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){await new AC().resume()}}catch(_){}
   if(navigator.vibrate)navigator.vibrate([50,30,100]);
@@ -236,7 +231,7 @@ function explodeParticles(){
   }
 }
 
-// === VÍDEO ===
+// Vídeo
 async function startVideo(){
   if(video.readyState<3){
     loading.style.display='flex';
@@ -244,8 +239,7 @@ async function startVideo(){
     gsap.to(loading,{opacity:0,duration:0.3,onComplete:()=>loading.style.display='none'});
   }
   videoContainer.style.display='block';
-  video.muted=false;video.currentTime=0;
-  video.classList.add('visible');
+  video.currentTime=0;video.muted=false;
   try{await video.play()}catch{video.muted=true;try{await video.play()}catch(_){video.currentTime=video.duration||0;showButtons()}}
   launchConfetti();
   try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}catch{musica.muted=true;musica.play().catch(()=>{})}
@@ -255,7 +249,7 @@ async function startVideo(){
   setTimeout(showButtons,15000);
 }
 
-// === BOTÕES APARECEM ===
+// Botões
 function showButtons(){
   if(buttonsShown)return;
   buttonsShown=true;
@@ -268,7 +262,7 @@ function showButtons(){
   });
 }
 
-// Shake = confetti
+// Shake easter egg
 let lastShake=0;
 if(window.DeviceMotionEvent){
   window.addEventListener('devicemotion',e=>{
@@ -279,7 +273,7 @@ if(window.DeviceMotionEvent){
   });
 }
 
-// Audio toggle
+// Audio
 audioBtn.addEventListener('click',()=>{
   if(musicaAtiva){musica.volume=0;audioBtn.textContent='🔇'}
   else{gsap.to(musica,{volume:0.7,duration:0.5});audioBtn.textContent='🔊'}
