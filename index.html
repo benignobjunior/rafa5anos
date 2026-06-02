@@ -108,12 +108,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   50%{box-shadow:0 0 35px rgba(0,255,255,1),0 0 80px rgba(0,255,255,0.5)}
 }
 
-/* Mãozinha */
-#hand{
-  position:absolute;z-index:65;font-size:clamp(1.5rem,4vw,2rem);
-  pointer-events:none;opacity:0;
-  filter:drop-shadow(0 2px 6px rgba(0,0,0,0.7));
+
+
+/* Mãozinhas sobre os botões */
+#botoes .hand{
+  position:absolute;font-size:clamp(1.3rem,3.5vw,1.8rem);
+  pointer-events:none;opacity:0;transform:translateY(5px);
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,0.8));
 }
+#botoes.show .hand{
+  opacity:1;transform:translateY(0);
+  animation:hand-bob 1.2s ease-in-out infinite;
+}
+@keyframes hand-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 
 #overlay{
   position:fixed;inset:0;z-index:200;
@@ -165,7 +172,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
       <source src="assets/video.mov" type="video/mp4">
     </video>
     <div id="botoes">
-      <div id="hand">👆</div>
+      <span class="hand" style="left:28%;top:60%">👆</span>
+      <span class="hand" style="left:41%;top:60%">👆</span>
+      <span class="hand" style="left:54.5%;top:60%">👆</span>
       <a href="https://forms.gle/nzumWp6gqjV2jWRC7" target="_blank" rel="noopener" aria-label="Confirmar presença"></a>
       <a href="https://maps.app.goo.gl/kCy7yiGR1m813gJN6" target="_blank" rel="noopener" aria-label="Ver no mapa"></a>
       <a href="#" id="btnImagem" aria-label="Ver convite"></a>
@@ -267,20 +276,7 @@ function showButtons(){
   gsap.to(botoes.querySelectorAll('a'),{
     opacity:1,scale:1,duration:0.7,stagger:0.2,
     ease:'elastic.out(1.2,0.4)',
-    onComplete:()=>{botoes.classList.add('show');showHand()}
-  });
-}
-
-// Mãozinha animada
-function showHand(){
-  const h=document.getElementById('hand');
-  if(!h)return;
-  const btn=botoes.querySelector('a');
-  h.style.left=(btn.offsetLeft+btn.offsetWidth/2-10)+'px';
-  h.style.top=(btn.offsetTop+btn.offsetHeight+4)+'px';
-  gsap.to(h,{opacity:1,duration:0.4});
-  gsap.to(h,{y:-8,duration:0.4,repeat:5,yoyo:true,ease:'power1.inOut',
-    onComplete:()=>gsap.to(h,{opacity:0,duration:0.3,onComplete:()=>h.remove()})
+    onComplete:()=>botoes.classList.add('show')
   });
 }
 
