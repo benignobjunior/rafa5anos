@@ -50,7 +50,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   color:#ffd700;font-size:clamp(0.7rem,2.5vw,0.95rem);font-weight:700;
   background:rgba(0,0,0,0.6);padding:0.4rem 1.2rem;border-radius:20px;
   backdrop-filter:blur(6px);border:1px solid rgba(255,215,0,0.3);
-  letter-spacing:0.5px;
 }
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(0.97)}}
 .sparkle{position:absolute;width:4px;height:4px;background:#ffd700;border-radius:50%;pointer-events:none;opacity:0;z-index:5}
@@ -71,10 +70,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   display:none;overflow:hidden;
 }
 #videoContainer .canvas video{
-  opacity:0;transition:opacity 0.3s;
   position:absolute;inset:0;width:100%!important;height:100%!important;
   object-fit:contain;object-position:center;pointer-events:none;
+  opacity:0;transition:opacity 0.3s;
 }
+#videoContainer .canvas video.visible{opacity:1}
 
 #botoes{position:absolute;inset:0;z-index:60;pointer-events:none}
 #botoes a{
@@ -88,30 +88,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 #botoes a:nth-child(2){left:37.6%;top:62.6%;width:11.9%;height:10%}
 #botoes a:nth-child(3){left:50.9%;top:62.6%;width:12%;height:10%}
 
+/* Glow + ripple SÓ quando .show é adicionado */
 #botoes a::before,#botoes a::after{
   content:'';position:absolute;inset:-6px;border-radius:16px;
-  border:2px solid rgba(255,255,255,0.9);opacity:0;pointer-events:none;
+  border:2px solid rgba(255,255,255,0.8);opacity:0;pointer-events:none;
 }
 #botoes.show a::before{animation:ripple 1.4s ease-out infinite}
 #botoes.show a::after{animation:ripple 1.4s ease-out 0.7s infinite}
-@keyframes ripple{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(1.5);opacity:0}}
+@keyframes ripple{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(1.6);opacity:0}}
 #botoes.show a{
-  background:radial-gradient(ellipse at center,rgba(255,255,255,0.25) 0%,transparent 70%);
-  box-shadow:0 0 20px rgba(255,255,255,0.6),0 0 45px rgba(255,255,255,0.3);
-  animation:breathe 1.8s ease-in-out infinite 0s,bounce 1s ease-in-out infinite 0s;
+  background:radial-gradient(ellipse at center,rgba(255,255,255,0.3) 0%,transparent 70%);
+  box-shadow:0 0 20px rgba(255,255,255,0.7),0 0 50px rgba(255,255,255,0.3);
+  animation:breathe 1.8s ease-in-out infinite,bounce 1.2s ease-in-out infinite;
 }
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes breathe{
-  0%,100%{box-shadow:0 0 20px rgba(255,255,255,0.6),0 0 45px rgba(255,255,255,0.3)}
-  50%{box-shadow:0 0 35px rgba(255,255,255,0.9),0 0 70px rgba(255,255,255,0.4)}
-}
-
-  position:absolute;bottom:12%;left:50%;transform:translateX(-50%);
-  z-index:70;pointer-events:none;opacity:0;
-  color:#fff;font-size:clamp(0.75rem,2.5vw,1rem);font-weight:600;
-  background:rgba(0,0,0,0.6);padding:0.5rem 1.2rem;border-radius:20px;
-  backdrop-filter:blur(6px);border:1px solid rgba(255,215,0,0.3);
-  white-space:nowrap;
+  0%,100%{box-shadow:0 0 20px rgba(255,255,255,0.7),0 0 50px rgba(255,255,255,0.3)}
+  50%{box-shadow:0 0 35px rgba(255,255,255,1),0 0 80px rgba(255,255,255,0.5)}
 }
 
 #overlay{
@@ -140,8 +133,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 #audioBtn:hover{transform:scale(1.1)}
 
 #confetti{position:fixed;inset:0;z-index:90;pointer-events:none}
-
-/* Explosion particles */
 .explosion{position:fixed;inset:0;z-index:110;pointer-events:none}
 .exp-particle{position:absolute;border-radius:50%;pointer-events:none}
 </style>
@@ -158,10 +149,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   </div>
 </div>
 
-<div id="loading">
-  <div class="spinner"></div>
-  <p>Preparando o convite...</p>
-</div>
+<div id="loading"><div class="spinner"></div><p>Preparando o convite...</p></div>
 
 <div id="videoContainer">
   <div class="canvas">
@@ -186,139 +174,112 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 <div class="explosion" id="explosion"></div>
 
 <script>
+const capa=document.getElementById('capa');
+const loading=document.getElementById('loading');
+const videoContainer=document.getElementById('videoContainer');
+const video=document.getElementById('video');
+const botoes=document.getElementById('botoes');
+const overlay=document.getElementById('overlay');
+const audioBtn=document.getElementById('audioBtn');
+const explosion=document.getElementById('explosion');
 const musica=new Audio('assets/musica.aac');
-musica.loop=true;musica.volume=0;let musicaAtiva=true;
+musica.loop=true;musica.volume=0;
+let musicaAtiva=true;
+let buttonsShown=false;
 
-// === COUNTDOWN NA CAPA ===
-function updateCapaCountdown(){
+// Countdown na capa
+function updateCountdown(){
   const t=new Date('2026-07-05T13:00:00-03:00')-new Date();
   const el=document.getElementById('countdown-capa');
   if(t<=0){el.textContent='🎉 É HOJE! 🎉';return}
   const d=Math.floor(t/864e5),h=Math.floor(t%864e5/36e5),m=Math.floor(t%36e5/6e4);
   el.textContent=`⏰ Faltam ${d} dias, ${h}h e ${m}min!`;
 }
-updateCapaCountdown();setInterval(updateCapaCountdown,60000);
+updateCountdown();setInterval(updateCountdown,60000);
 
-// === SPARKLES ===
-(function(){
-  for(let i=0;i<25;i++){
-    const s=document.createElement('div');s.className='sparkle';
-    s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
-    capa.querySelector('.canvas').appendChild(s);
-    gsap.to(s,{opacity:1,scale:2,duration:0.6,repeat:-1,yoyo:true,delay:Math.random()*3,ease:'power1.inOut'});
-    gsap.to(s,{x:()=>(Math.random()-0.5)*40,y:()=>(Math.random()-0.5)*40,duration:3+Math.random()*2,repeat:-1,yoyo:true,ease:'sine.inOut'});
-  }
-})();
+// Sparkles na capa
+for(let i=0;i<25;i++){
+  const s=document.createElement('div');s.className='sparkle';
+  s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+  capa.querySelector('.canvas').appendChild(s);
+  gsap.to(s,{opacity:1,scale:2,duration:0.6,repeat:-1,yoyo:true,delay:Math.random()*3,ease:'power1.inOut'});
+  gsap.to(s,{x:()=>(Math.random()-0.5)*40,y:()=>(Math.random()-0.5)*40,duration:3+Math.random()*2,repeat:-1,yoyo:true,ease:'sine.inOut'});
+}
 
-// Preload
-video.preload='auto';video.muted=true;
+// Preload video (silencioso)
+video.muted=true;
 video.play().then(()=>{video.pause();video.currentTime=0}).catch(()=>{});
 
-// === ABRIR ===
+// === ABRIR CONVITE ===
 capa.addEventListener('click',async()=>{
-  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){const ctx=new AC();await ctx.resume()}}catch(_){}
-
-  // Vibração tátil
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){await new AC().resume()}}catch(_){}
   if(navigator.vibrate)navigator.vibrate([50,30,100]);
-
-  // Explosão de partículas da capa
   explodeParticles();
-
-  const tl=gsap.timeline();
-  tl.to('.tap-text',{opacity:0,y:20,duration:0.2})
+  gsap.timeline()
+    .to('.tap-text',{opacity:0,y:20,duration:0.2})
     .to('#countdown-capa',{opacity:0,y:20,duration:0.2},'<')
     .to('.sparkle',{scale:4,opacity:0,duration:0.5,stagger:0.01,ease:'power2.out'},'<')
     .to('#capa .canvas img',{scale:1.2,duration:0.6,ease:'power2.in'},'<0.1')
-    .to(capa,{opacity:0,duration:0.4,onComplete:()=>{
-      capa.style.display='none';
-      startVideo();
-    }},'<0.3');
+    .to(capa,{opacity:0,duration:0.4,onComplete:()=>{capa.style.display='none';startVideo()}},'<0.3');
 });
 
-// === EXPLOSÃO DE PARTÍCULAS NA TRANSIÇÃO ===
 function explodeParticles(){
   const colors=['#ffd700','#ff9800','#e53935','#4caf50','#2196f3','#9c27b0','#fff'];
   for(let i=0;i<40;i++){
-    const p=document.createElement('div');
-    p.className='exp-particle';
+    const p=document.createElement('div');p.className='exp-particle';
     const size=Math.random()*8+4;
-    p.style.cssText=`width:${size}px;height:${size}px;background:${colors[i%colors.length]};left:50%;top:50%;`;
+    p.style.cssText=`width:${size}px;height:${size}px;background:${colors[i%colors.length]};left:50%;top:50%`;
     explosion.appendChild(p);
     const angle=Math.random()*Math.PI*2;
     const dist=Math.random()*Math.max(innerWidth,innerHeight)*0.7;
-    gsap.to(p,{
-      x:Math.cos(angle)*dist,y:Math.sin(angle)*dist,
-      opacity:0,scale:0,duration:1+Math.random()*0.5,
-      ease:'power2.out',
-      onComplete:()=>p.remove()
-    });
+    gsap.to(p,{x:Math.cos(angle)*dist,y:Math.sin(angle)*dist,opacity:0,scale:0,duration:1+Math.random()*0.5,ease:'power2.out',onComplete:()=>p.remove()});
   }
 }
 
+// === VÍDEO ===
 async function startVideo(){
-  const ready=video.readyState>=3;
-  if(!ready){
+  if(video.readyState<3){
     loading.style.display='flex';
     await new Promise(r=>{video.addEventListener('canplay',r,{once:true});setTimeout(r,8000)});
     gsap.to(loading,{opacity:0,duration:0.3,onComplete:()=>loading.style.display='none'});
   }
-
   videoContainer.style.display='block';
   video.muted=false;video.currentTime=0;
-  video.style.opacity="1";
-
-  try{await video.play()}catch{
-    video.muted=true;
-    try{await video.play()}catch(_){video.currentTime=video.duration||0;showButtons()}
-  }
-
+  video.classList.add('visible');
+  try{await video.play()}catch{video.muted=true;try{await video.play()}catch(_){video.currentTime=video.duration||0;showButtons()}}
   launchConfetti();
-
-  try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}
-  catch{musica.muted=true;musica.play().catch(()=>{})}
+  try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}catch{musica.muted=true;musica.play().catch(()=>{})}
   audioBtn.style.display='block';gsap.from(audioBtn,{scale:0,duration:0.5,delay:1,ease:'back.out(2)'});
-
-  const showAfterVideo=()=>showButtons();
-  video.addEventListener('ended',showAfterVideo,{once:true});
-  video.addEventListener('pause',()=>{if(video.currentTime>0)showAfterVideo()},{once:true});
-  setTimeout(showAfterVideo,15000);
+  video.addEventListener('ended',showButtons,{once:true});
+  video.addEventListener('pause',()=>{if(video.currentTime>0)showButtons()},{once:true});
+  setTimeout(showButtons,15000);
 }
 
+// === BOTÕES APARECEM ===
 function showButtons(){
-  if(botoes.classList.contains('show'))return;
-
-  // Vibração ao mostrar botões
+  if(buttonsShown)return;
+  buttonsShown=true;
   if(navigator.vibrate)navigator.vibrate([30,20,30]);
-
-  // Segundo confetti!
   launchConfetti();
-
-  const btns=botoes.querySelectorAll('a');
-  gsap.to(btns,{
+  gsap.to(botoes.querySelectorAll('a'),{
     opacity:1,scale:1,duration:0.7,stagger:0.2,
     ease:'elastic.out(1.2,0.4)',
-    onComplete:()=>{
-      botoes.classList.add('show');
-    }
+    onComplete:()=>botoes.classList.add('show')
   });
 }
 
-// === SHAKE EASTER EGG ===
+// Shake = confetti
 let lastShake=0;
 if(window.DeviceMotionEvent){
   window.addEventListener('devicemotion',e=>{
-    const a=e.accelerationIncludingGravity;
-    if(!a)return;
-    const force=Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z);
-    if(force>35&&Date.now()-lastShake>2000){
-      lastShake=Date.now();
-      if(navigator.vibrate)navigator.vibrate(100);
-      launchConfetti();
+    const a=e.accelerationIncludingGravity;if(!a)return;
+    if(Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z)>35&&Date.now()-lastShake>2000){
+      lastShake=Date.now();if(navigator.vibrate)navigator.vibrate(100);launchConfetti();
     }
   });
 }
 
-// Audio
+// Audio toggle
 audioBtn.addEventListener('click',()=>{
   if(musicaAtiva){musica.volume=0;audioBtn.textContent='🔇'}
   else{gsap.to(musica,{volume:0.7,duration:0.5});audioBtn.textContent='🔊'}
@@ -326,7 +287,7 @@ audioBtn.addEventListener('click',()=>{
 });
 
 // Overlay
-document.getElementById('btnImagem').addEventListener('click',(e)=>{
+document.getElementById('btnImagem').addEventListener('click',e=>{
   e.preventDefault();overlay.style.display='flex';
   gsap.from(overlay,{opacity:0,duration:0.3});
   gsap.from(overlay.querySelector('img'),{scale:0.9,opacity:0,duration:0.4,ease:'back.out(1.5)'});
@@ -334,30 +295,24 @@ document.getElementById('btnImagem').addEventListener('click',(e)=>{
 overlay.querySelector('.close').addEventListener('click',()=>{
   gsap.to(overlay,{opacity:0,duration:0.2,onComplete:()=>{overlay.style.display='none';overlay.style.opacity=1}});
 });
-overlay.addEventListener('click',(e)=>{if(e.target===overlay)overlay.querySelector('.close').click()});
+overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.querySelector('.close').click()});
 
-// === CONFETTI ===
+// Confetti
 function launchConfetti(){
   const c=document.getElementById('confetti'),ctx=c.getContext('2d');
   c.width=innerWidth;c.height=innerHeight;
   const colors=['#ffd700','#e53935','#4caf50','#2196f3','#ff9800','#9c27b0','#00bcd4','#ff5722'],P=[];
   for(let i=0;i<200;i++){
-    const angle=(Math.random()-0.5)*Math.PI;
-    P.push({x:c.width*0.5+(Math.random()-0.5)*c.width*0.2,y:c.height*0.5,
-      vx:Math.cos(angle)*(Math.random()*14+6),vy:Math.sin(angle)*(Math.random()*14+6)-12,
-      color:colors[i%colors.length],w:Math.random()*10+4,h:Math.random()*6+3,
-      rot:Math.random()*360,rv:(Math.random()-0.5)*15,life:1});
+    const ang=(Math.random()-0.5)*Math.PI;
+    P.push({x:c.width/2+(Math.random()-0.5)*c.width*0.2,y:c.height/2,vx:Math.cos(ang)*(Math.random()*14+6),vy:Math.sin(ang)*(Math.random()*14+6)-12,color:colors[i%8],w:Math.random()*10+4,h:Math.random()*6+3,rot:Math.random()*360,rv:(Math.random()-0.5)*15,life:1});
   }
   let f=0;
-  function draw(){
+  !function draw(){
     ctx.clearRect(0,0,c.width,c.height);let alive=false;
     P.forEach(p=>{p.vy+=0.4;p.x+=p.vx;p.y+=p.vy;p.vx*=0.985;p.rot+=p.rv;p.life-=0.002;
-      if(p.life>0&&p.y<c.height+50){alive=true;ctx.save();ctx.globalAlpha=p.life;
-        ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
-        ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}});
-    f++;if(alive&&f<400)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);
-  }
-  draw();
+      if(p.life>0&&p.y<c.height+50){alive=true;ctx.save();ctx.globalAlpha=p.life;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}});
+    if(alive&&++f<400)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);
+  }();
 }
 
 document.addEventListener('contextmenu',e=>e.preventDefault());
