@@ -106,9 +106,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   50%{box-shadow:0 0 35px rgba(0,255,255,1),0 0 80px rgba(0,255,255,0.5)}
 }
 
-/* Finger pointer */
-#finger{position:absolute;z-index:65;font-size:clamp(1.8rem,5vw,2.5rem);pointer-events:none;opacity:0;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.6))}
-
 #overlay{
   position:fixed;inset:0;z-index:200;
   display:none;align-items:center;justify-content:center;
@@ -159,7 +156,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
       <source src="assets/video.mov" type="video/mp4">
     </video>
     <div id="botoes">
-      <div id="finger">🚀</div>
       <a href="https://forms.gle/nzumWp6gqjV2jWRC7" target="_blank" rel="noopener" aria-label="Confirmar presença"></a>
       <a href="https://maps.app.goo.gl/kCy7yiGR1m813gJN6" target="_blank" rel="noopener" aria-label="Ver no mapa"></a>
       <a href="#" id="btnImagem" aria-label="Ver convite"></a>
@@ -262,19 +258,8 @@ function showButtons(){
   gsap.to(botoes.querySelectorAll('a'),{
     opacity:1,scale:1,duration:0.7,stagger:0.2,
     ease:'elastic.out(1.2,0.4)',
-    onComplete:()=>{botoes.classList.add('show');setTimeout(showFinger,2000)}
+    onComplete:()=>botoes.classList.add('show')
   });
-}
-
-// Finger pointer
-function showFinger(){
-  const f=document.getElementById('finger');
-  const btn=botoes.querySelector('a');
-  f.style.left=btn.offsetLeft+btn.offsetWidth/2-12+'px';
-  f.style.top=btn.offsetTop+btn.offsetHeight+20+'px';
-  gsap.set(f,{opacity:1,y:80,rotation:0});
-  gsap.to(f,{y:0,duration:0.8,ease:'power2.out'});
-  gsap.to(f,{y:-20,opacity:0,duration:0.6,delay:1.5,ease:'power2.in',onComplete:()=>f.remove()});
 }
 
 // Shake easter egg
