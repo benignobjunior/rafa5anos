@@ -201,6 +201,11 @@ for(let i=0;i<25;i++){
 
 // Abrir convite
 capa.addEventListener('click',async()=>{
+  // Iniciar áudio SINCRONAMENTE no user gesture (iOS exige)
+  video.muted=false;video.volume=0;video.currentTime=0;
+  video.play().catch(()=>{video.muted=true;video.play().catch(()=>{})});
+  musica.play().catch(()=>{});
+
   try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){await new AC().resume()}}catch(_){}
   if(navigator.vibrate)navigator.vibrate([50,30,100]);
   explodeParticles();
@@ -209,7 +214,7 @@ capa.addEventListener('click',async()=>{
     .to('#countdown-capa',{opacity:0,y:20,duration:0.2},'<')
     .to('.sparkle',{scale:4,opacity:0,duration:0.5,stagger:0.01,ease:'power2.out'},'<')
     .to('#capa .canvas img',{scale:1.2,duration:0.6,ease:'power2.in'},'<0.1')
-    .to(capa,{opacity:0,duration:0.4,onComplete:()=>{capa.style.display='none';startVideo()}},'<0.3');
+    .to(capa,{opacity:0,duration:0.4,onComplete:()=>{capa.style.display='none';showVideo()}},'<0.3');
 });
 
 function explodeParticles(){
@@ -225,16 +230,12 @@ function explodeParticles(){
   }
 }
 
-// Vídeo
-async function startVideo(){
-  if(video.readyState<3){
-    loading.style.display='flex';
-    await new Promise(r=>{video.addEventListener('canplay',r,{once:true});setTimeout(r,8000)});
-    gsap.to(loading,{opacity:0,duration:0.3,onComplete:()=>loading.style.display='none'});
-  }
+// Mostrar vídeo (já está tocando desde o clique)
+function showVideo(){
   videoContainer.style.display='block';
-  video.currentTime=0;video.muted=false;
-  try{await video.play()}catch{video.muted=true;try{await video.play()}catch(_){video.currentTime=video.duration||0}}
+  // Fade in de volume
+  gsap.to(video,{volume:1,duration:0.5});
+  gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'});
   launchConfetti();
   // Mostrar mãozinhas no segundo 30 do vídeo
   video.addEventListener('timeupdate',function(){
@@ -244,7 +245,6 @@ async function startVideo(){
     }
   });
 
-  try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}catch{musica.muted=true;musica.play().catch(()=>{})}
   audioBtn.style.display='block';gsap.from(audioBtn,{scale:0,duration:0.5,delay:1,ease:'back.out(2)'});
 
 }
