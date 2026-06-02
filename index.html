@@ -237,7 +237,7 @@ async function startVideo(){
   launchConfetti();
   // Mostrar mãozinhas no segundo 30 do vídeo
   video.addEventListener('timeupdate',function(){
-    if(video.currentTime>=25&&!botoes.classList.contains('show')){
+    if(video.currentTime>=22&&!botoes.classList.contains('show')){
       botoes.classList.add('show');
       document.querySelectorAll('.hand').forEach(h=>gsap.to(h,{opacity:1,duration:0.5}));
     }
