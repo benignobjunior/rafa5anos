@@ -89,22 +89,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 
 #botoes a::before,#botoes a::after{
   content:'';position:absolute;inset:-6px;border-radius:16px;
-  border:2px solid rgba(255,215,0,0.6);opacity:0;pointer-events:none;
+  border:2px solid rgba(255,215,0,0.8);opacity:0;pointer-events:none;
 }
-#botoes.show a::before{animation:ripple 2s ease-out infinite}
-#botoes.show a::after{animation:ripple 2s ease-out 1s infinite}
+#botoes.show a::before{animation:ripple 1.4s ease-out infinite}
+#botoes.show a::after{animation:ripple 1.4s ease-out 0.7s infinite}
 @keyframes ripple{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(1.5);opacity:0}}
 #botoes.show a{
   background:radial-gradient(ellipse at center,rgba(255,215,0,0.2) 0%,transparent 70%);
-  box-shadow:0 0 20px rgba(255,215,0,0.3),0 0 40px rgba(255,215,0,0.1);
-  animation:breathe 2.5s ease-in-out infinite;
+  box-shadow:0 0 25px rgba(255,215,0,0.5),0 0 50px rgba(255,215,0,0.2);
+  animation:breathe 1.8s ease-in-out infinite,bounce 1s ease-in-out infinite;
 }
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes breathe{
-  0%,100%{box-shadow:0 0 20px rgba(255,215,0,0.3),0 0 40px rgba(255,215,0,0.1)}
-  50%{box-shadow:0 0 30px rgba(255,215,0,0.5),0 0 60px rgba(255,215,0,0.2)}
+  0%,100%{box-shadow:0 0 25px rgba(255,215,0,0.5),0 0 50px rgba(255,215,0,0.2)}
+  50%{box-shadow:0 0 40px rgba(255,215,0,0.7),0 0 80px rgba(255,215,0,0.3)}
 }
 
-#ctaHint{
   position:absolute;bottom:12%;left:50%;transform:translateX(-50%);
   z-index:70;pointer-events:none;opacity:0;
   color:#fff;font-size:clamp(0.75rem,2.5vw,1rem);font-weight:600;
@@ -172,7 +172,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
       <a href="https://maps.app.goo.gl/kCy7yiGR1m813gJN6" target="_blank" rel="noopener" aria-label="Ver no mapa"></a>
       <a href="#" id="btnImagem" aria-label="Ver convite"></a>
     </div>
-    <div id="ctaHint">👆 Toque nos ícones acima!</div>
   </div>
 </div>
 
@@ -186,7 +185,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 <div class="explosion" id="explosion"></div>
 
 <script>
-const capa=document.getElementById('capa'),loading=document.getElementById('loading'),videoContainer=document.getElementById('videoContainer'),video=document.getElementById('video'),botoes=document.getElementById('botoes'),overlay=document.getElementById('overlay'),audioBtn=document.getElementById('audioBtn'),ctaHint=document.getElementById('ctaHint'),explosion=document.getElementById('explosion');
 const musica=new Audio('assets/musica.aac');
 musica.loop=true;musica.volume=0;let musicaAtiva=true;
 
@@ -299,8 +297,6 @@ function showButtons(){
     ease:'elastic.out(1.2,0.4)',
     onComplete:()=>{
       botoes.classList.add('show');
-      gsap.to(ctaHint,{opacity:1,duration:0.5,delay:0.5});
-      gsap.to(ctaHint,{opacity:0,duration:0.5,delay:5});
     }
   });
 }
