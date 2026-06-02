@@ -242,7 +242,7 @@ async function startVideo(){
   try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}catch{musica.muted=true;musica.play().catch(()=>{})}
   audioBtn.style.display='block';gsap.from(audioBtn,{scale:0,duration:0.5,delay:1,ease:'back.out(2)'});
   video.addEventListener('ended',showButtons,{once:true});
-  setTimeout(showButtons,55000);
+  setTimeout(showButtons,5000);
 }
 
 // Botões
