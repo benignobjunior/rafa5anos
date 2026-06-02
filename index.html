@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aniversário do Rafael - 5 Anos 🚀</title>
+<meta name="description" content="Você está convidado para o aniversário do Rafael!">
+<meta property="og:title" content="Aniversário do Rafael - 5 Anos 🚀">
+<meta property="og:description" content="Clique para abrir o convite!">
+<meta property="og:image" content="https://luconviteria.com.br/wp-content/uploads/2026/03/Copia-de-Copia-de-Pack-Toy-Story_20260317_205603_0000.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:system-ui,sans-serif}
+
+.canvas{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  max-width:100vw;max-height:100vh;
+  aspect-ratio:1080/1850;
+}
+@supports(height:100dvh){.canvas{max-height:100dvh}}
+@media(max-aspect-ratio:1080/1850){
+  .canvas{width:100vw;height:auto}
+}
+@media(min-aspect-ratio:1080/1850){
+  .canvas{height:100vh;width:auto}
+  @supports(height:100dvh){.canvas{height:100dvh}}
+}
+
+#capa{
+  position:fixed;inset:0;z-index:100;background:#000;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;overflow:hidden;
+}
+#capa .canvas img{
+  position:absolute;inset:0;width:100%!important;height:100%!important;
+  object-fit:contain;object-position:center;user-select:none;-webkit-user-drag:none;
+}
+#capa .tap-overlay{
+  position:absolute;inset:0;z-index:10;
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:8%;
+}
+#capa .tap-text{
+  color:#fff;font-size:clamp(0.8rem,3vw,1.1rem);font-weight:500;
+  background:rgba(0,0,0,0.5);padding:0.6rem 1.5rem;border-radius:30px;
+  backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(0.97)}}
+
+.sparkle{
+  position:absolute;width:4px;height:4px;background:#ffd700;border-radius:50%;
+  pointer-events:none;opacity:0;z-index:5;
+}
+
+#videoContainer{
+  position:fixed;inset:0;z-index:50;background:#000;
+  display:none;overflow:hidden;
+}
+#videoContainer .canvas video{
+  position:absolute;inset:0;width:100%!important;height:100%!important;
+  object-fit:contain;object-position:center;pointer-events:none;
+}
+
+#botoes{position:absolute;inset:0;z-index:60;pointer-events:none}
+#botoes a{
+  position:absolute;display:block;pointer-events:auto;
+  background:transparent;border:0;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform 0.2s;
+}
+#botoes a:active{transform:scale(0.95)}
+#botoes a:nth-child(1){left:25.5%;top:62.7%;width:10.2%;height:10%}
+#botoes a:nth-child(2){left:37.6%;top:62.6%;width:11.9%;height:10%}
+#botoes a:nth-child(3){left:50.9%;top:62.6%;width:12%;height:10%}
+
+#botoes a::after{
+  content:'';position:absolute;inset:-4px;border-radius:12px;
+  background:rgba(255,215,0,0.15);
+  animation:btnGlow 2s ease-in-out infinite;opacity:0;
+}
+#botoes.show a::after{opacity:1}
+@keyframes btnGlow{0%,100%{opacity:0;transform:scale(0.95)}50%{opacity:1;transform:scale(1.05)}}
+
+#overlay{
+  position:fixed;inset:0;z-index:200;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);
+}
+#overlay img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:8px;box-shadow:0 20px 80px rgba(0,0,0,0.6)}
+#overlay .close{
+  position:absolute;top:max(env(safe-area-inset-top,16px),16px);
+  right:max(env(safe-area-inset-right,16px),16px);
+  width:48px;height:48px;background:rgba(255,255,255,0.9);
+  border:none;border-radius:50%;font-size:24px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:transform 0.2s;
+}
+#overlay .close:hover{transform:scale(1.1)}
+
+#audioBtn{
+  position:fixed;bottom:max(env(safe-area-inset-bottom,16px),16px);
+  right:16px;z-index:300;width:44px;height:44px;
+  background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);
+  border-radius:50%;color:#fff;font-size:1.2rem;cursor:pointer;
+  backdrop-filter:blur(8px);display:none;transition:transform 0.2s;
+}
+#audioBtn:hover{transform:scale(1.1)}
+
+#confetti{position:fixed;inset:0;z-index:90;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div id="capa">
+  <div class="canvas">
+    <img src="https://luconviteria.com.br/wp-content/uploads/2026/03/Copia-de-Copia-de-Pack-Toy-Story_20260317_205603_0000.png" alt="Convite Rafael 5 Anos" decoding="async">
+  </div>
+  <div class="tap-overlay">
+    <span class="tap-text">✨ Toque para abrir ✨</span>
+  </div>
+</div>
+
+<div id="videoContainer">
+  <div class="canvas">
+    <video id="video" playsinline webkit-playsinline preload="auto">
+      <source src="https://luconviteria.com.br/wp-content/uploads/2026/05/copy_F09A4B3F-260E-4AB8-8899-3F0138545CA4.mov" type="video/mp4">
+    </video>
+    <div id="botoes">
+      <a href="https://forms.gle/nzumWp6gqjV2jWRC7" target="_blank" rel="noopener" aria-label="Confirmar presença"></a>
+      <a href="https://maps.app.goo.gl/kCy7yiGR1m813gJN6" target="_blank" rel="noopener" aria-label="Ver no mapa"></a>
+      <a href="#" id="btnImagem" aria-label="Ver convite"></a>
+    </div>
+  </div>
+</div>
+
+<div id="overlay">
+  <button class="close" aria-label="Fechar">×</button>
+  <img src="https://luconviteria.com.br/wp-content/uploads/2026/05/Toy-story-html-2.png" alt="Convite completo" decoding="async">
+</div>
+
+<button id="audioBtn" aria-label="Controlar música">🔊</button>
+<canvas id="confetti"></canvas>
+
+<script>
+const capa=document.getElementById('capa'),videoContainer=document.getElementById('videoContainer'),video=document.getElementById('video'),botoes=document.getElementById('botoes'),overlay=document.getElementById('overlay'),audioBtn=document.getElementById('audioBtn');
+const musica=new Audio('https://luconviteria.com.br/wp-content/uploads/2026/03/Audio_2026_03_18_11_32_01.aac');
+musica.loop=true;musica.volume=0;let musicaAtiva=true;
+
+(function(){
+  for(let i=0;i<20;i++){
+    const s=document.createElement('div');s.className='sparkle';
+    s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+    capa.querySelector('.canvas').appendChild(s);
+    gsap.to(s,{opacity:1,scale:2,duration:0.6,repeat:-1,yoyo:true,delay:Math.random()*3,ease:'power1.inOut'});
+    gsap.to(s,{x:()=>(Math.random()-0.5)*30,y:()=>(Math.random()-0.5)*30,duration:3+Math.random()*2,repeat:-1,yoyo:true,ease:'sine.inOut'});
+  }
+})();
+
+video.preload='auto';video.muted=true;
+video.play().then(()=>{video.pause();video.currentTime=0}).catch(()=>{});
+
+capa.addEventListener('click',async()=>{
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){const ctx=new AC();await ctx.resume()}}catch(_){}
+  const tl=gsap.timeline();
+  tl.to('.tap-text',{opacity:0,y:20,duration:0.3})
+    .to('.sparkle',{opacity:0,scale:0,duration:0.3,stagger:0.02},'<')
+    .to(capa,{scale:1.1,opacity:0,duration:0.8,ease:'power2.in',onComplete:()=>{capa.style.display='none';videoContainer.style.display='block';playVideo()}});
+});
+
+async function playVideo(){
+  video.muted=false;video.currentTime=0;
+  try{await video.play()}catch{video.muted=true;try{await video.play()}catch(_){}}
+  launchConfetti();
+  try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}catch{musica.muted=true;musica.play().catch(()=>{})}
+  audioBtn.style.display='block';gsap.from(audioBtn,{scale:0,duration:0.5,delay:1,ease:'back.out(2)'});
+  setTimeout(()=>botoes.classList.add('show'),3000);
+}
+
+audioBtn.addEventListener('click',()=>{
+  if(musicaAtiva){musica.volume=0;audioBtn.textContent='🔇'}
+  else{gsap.to(musica,{volume:0.7,duration:0.5});audioBtn.textContent='🔊'}
+  musicaAtiva=!musicaAtiva;
+});
+
+document.getElementById('btnImagem').addEventListener('click',(e)=>{
+  e.preventDefault();overlay.style.display='flex';
+  gsap.from(overlay,{opacity:0,duration:0.3});
+  gsap.from(overlay.querySelector('img'),{scale:0.9,opacity:0,duration:0.4,ease:'back.out(1.5)'});
+});
+overlay.querySelector('.close').addEventListener('click',()=>{
+  gsap.to(overlay,{opacity:0,duration:0.2,onComplete:()=>{overlay.style.display='none';overlay.style.opacity=1}});
+});
+overlay.addEventListener('click',(e)=>{if(e.target===overlay)overlay.querySelector('.close').click()});
+
+function launchConfetti(){
+  const c=document.getElementById('confetti'),ctx=c.getContext('2d');
+  c.width=innerWidth;c.height=innerHeight;
+  const colors=['#ffd700','#e53935','#4caf50','#2196f3','#ff9800','#9c27b0','#00bcd4'],P=[];
+  for(let i=0;i<180;i++)P.push({x:c.width*0.5+(Math.random()-0.5)*c.width*0.3,y:c.height*0.4,vx:(Math.random()-0.5)*16,vy:Math.random()*-20-8,color:colors[i%colors.length],w:Math.random()*10+4,h:Math.random()*6+3,rot:Math.random()*360,rv:(Math.random()-0.5)*14,life:1});
+  let f=0;
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);let alive=false;
+    P.forEach(p=>{p.vy+=0.45;p.x+=p.vx;p.y+=p.vy;p.vx*=0.985;p.rot+=p.rv;p.life-=0.0025;
+      if(p.life>0&&p.y<c.height+50){alive=true;ctx.save();ctx.globalAlpha=p.life;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}});
+    f++;if(alive&&f<350)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);
+  }
+  draw();
+}
+
+document.addEventListener('contextmenu',e=>e.preventDefault());
+</script>
+</body>
+</html>
