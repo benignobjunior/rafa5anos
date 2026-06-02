@@ -6,22 +6,24 @@
 <title>Aniversário do Rafael - 5 Anos 🚀</title>
 <meta name="description" content="Você está convidado para o aniversário do Rafael!">
 <meta property="og:title" content="Aniversário do Rafael - 5 Anos 🚀">
-<meta property="og:description" content="Clique para abrir o convite!">
-<meta property="og:image" content="assets/capa.png">
+<meta property="og:description" content="Toque para abrir o convite!">
+<meta property="og:image" content="https://benignobjunior.github.io/rafa5anos/assets/capa.png">
+<meta property="og:url" content="https://benignobjunior.github.io/rafa5anos/">
+<meta property="og:type" content="website">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:system-ui,sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:system-ui,-apple-system,sans-serif}
 
 .canvas{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  max-width:100vw;max-height:100vh;
-  aspect-ratio:1080/1850;
+  max-width:100vw;max-height:100vh;aspect-ratio:1080/1850;
 }
 @supports(height:100dvh){.canvas{max-height:100dvh}}
 @media(max-aspect-ratio:1080/1850){.canvas{width:100vw;height:auto}}
 @media(min-aspect-ratio:1080/1850){.canvas{height:100vh;width:auto}@supports(height:100dvh){.canvas{height:100dvh}}}
 
+/* CAPA */
 #capa{
   position:fixed;inset:0;z-index:100;background:#000;
   display:flex;align-items:center;justify-content:center;
@@ -42,12 +44,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   animation:pulse 2s infinite;
 }
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(0.97)}}
+.sparkle{position:absolute;width:4px;height:4px;background:#ffd700;border-radius:50%;pointer-events:none;opacity:0;z-index:5}
 
-.sparkle{
-  position:absolute;width:4px;height:4px;background:#ffd700;border-radius:50%;
-  pointer-events:none;opacity:0;z-index:5;
+/* LOADING */
+#loading{
+  position:fixed;inset:0;z-index:150;background:#000;
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;
 }
+#loading .spinner{
+  width:48px;height:48px;border:3px solid rgba(255,215,0,0.2);
+  border-top-color:#ffd700;border-radius:50%;animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:#fff;font-size:0.9rem;opacity:0.7}
 
+/* VIDEO */
 #videoContainer{
   position:fixed;inset:0;z-index:50;background:#000;
   display:none;overflow:hidden;
@@ -57,13 +68,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   object-fit:contain;object-position:center;pointer-events:none;
 }
 
-/* === BOTÕES COM ANIMAÇÃO PREMIUM === */
+/* BOTÕES */
 #botoes{position:absolute;inset:0;z-index:60;pointer-events:none}
 #botoes a{
   position:absolute;display:block;pointer-events:auto;
   background:transparent;border:0;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-  transition:transform 0.15s;
+  -webkit-tap-highlight-color:transparent;transition:transform 0.15s;
   opacity:0;transform:scale(0);
 }
 #botoes a:active{transform:scale(0.9)!important}
@@ -71,20 +81,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 #botoes a:nth-child(2){left:37.6%;top:62.6%;width:11.9%;height:10%}
 #botoes a:nth-child(3){left:50.9%;top:62.6%;width:12%;height:10%}
 
-/* Ripple rings */
 #botoes a::before,#botoes a::after{
   content:'';position:absolute;inset:-6px;border-radius:16px;
-  border:2px solid rgba(255,215,0,0.6);
-  opacity:0;pointer-events:none;
+  border:2px solid rgba(255,215,0,0.6);opacity:0;pointer-events:none;
 }
 #botoes.show a::before{animation:ripple 2s ease-out infinite}
 #botoes.show a::after{animation:ripple 2s ease-out 1s infinite}
-@keyframes ripple{
-  0%{transform:scale(0.9);opacity:0.8}
-  100%{transform:scale(1.5);opacity:0}
-}
-
-/* Inner glow */
+@keyframes ripple{0%{transform:scale(0.9);opacity:0.8}100%{transform:scale(1.5);opacity:0}}
 #botoes.show a{
   background:radial-gradient(ellipse at center,rgba(255,215,0,0.2) 0%,transparent 70%);
   box-shadow:0 0 20px rgba(255,215,0,0.3),0 0 40px rgba(255,215,0,0.1);
@@ -95,12 +98,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   50%{box-shadow:0 0 30px rgba(255,215,0,0.5),0 0 60px rgba(255,215,0,0.2)}
 }
 
-/* Floating particles around buttons */
-.btn-particle{
-  position:absolute;width:3px;height:3px;border-radius:50%;
-  pointer-events:none;z-index:61;
+/* CTA HINT (instrução pós-vídeo) */
+#ctaHint{
+  position:absolute;bottom:12%;left:50%;transform:translateX(-50%);
+  z-index:70;pointer-events:none;opacity:0;
+  color:#fff;font-size:clamp(0.75rem,2.5vw,1rem);font-weight:600;
+  background:rgba(0,0,0,0.6);padding:0.5rem 1.2rem;border-radius:20px;
+  backdrop-filter:blur(6px);border:1px solid rgba(255,215,0,0.3);
+  white-space:nowrap;
 }
 
+/* OVERLAY */
 #overlay{
   position:fixed;inset:0;z-index:200;
   display:none;align-items:center;justify-content:center;
@@ -117,6 +125,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 }
 #overlay .close:hover{transform:scale(1.1)}
 
+/* AUDIO */
 #audioBtn{
   position:fixed;bottom:max(env(safe-area-inset-bottom,16px),16px);
   right:16px;z-index:300;width:44px;height:44px;
@@ -140,6 +149,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
   </div>
 </div>
 
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Preparando o convite...</p>
+</div>
+
 <div id="videoContainer">
   <div class="canvas">
     <video id="video" playsinline webkit-playsinline preload="auto">
@@ -150,6 +164,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
       <a href="https://maps.app.goo.gl/kCy7yiGR1m813gJN6" target="_blank" rel="noopener" aria-label="Ver no mapa"></a>
       <a href="#" id="btnImagem" aria-label="Ver convite"></a>
     </div>
+    <div id="ctaHint">👆 Toque nos ícones acima!</div>
   </div>
 </div>
 
@@ -162,10 +177,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 <canvas id="confetti"></canvas>
 
 <script>
-const capa=document.getElementById('capa'),videoContainer=document.getElementById('videoContainer'),video=document.getElementById('video'),botoes=document.getElementById('botoes'),overlay=document.getElementById('overlay'),audioBtn=document.getElementById('audioBtn');
+const capa=document.getElementById('capa'),loading=document.getElementById('loading'),videoContainer=document.getElementById('videoContainer'),video=document.getElementById('video'),botoes=document.getElementById('botoes'),overlay=document.getElementById('overlay'),audioBtn=document.getElementById('audioBtn'),ctaHint=document.getElementById('ctaHint');
 const musica=new Audio('assets/musica.aac');
 musica.loop=true;musica.volume=0;let musicaAtiva=true;
 
+// Sparkles
 (function(){
   for(let i=0;i<20;i++){
     const s=document.createElement('div');s.className='sparkle';
@@ -176,85 +192,84 @@ musica.loop=true;musica.volume=0;let musicaAtiva=true;
   }
 })();
 
+// Preload
 video.preload='auto';video.muted=true;
 video.play().then(()=>{video.pause();video.currentTime=0}).catch(()=>{});
 
+// === ABRIR ===
 capa.addEventListener('click',async()=>{
   try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){const ctx=new AC();await ctx.resume()}}catch(_){}
+
   const tl=gsap.timeline();
   tl.to('.tap-text',{opacity:0,y:20,duration:0.3})
     .to('.sparkle',{opacity:0,scale:0,duration:0.3,stagger:0.02},'<')
-    .to(capa,{scale:1.1,opacity:0,duration:0.8,ease:'power2.in',onComplete:()=>{capa.style.display='none';videoContainer.style.display='block';playVideo()}});
+    .to(capa,{scale:1.1,opacity:0,duration:0.6,ease:'power2.in',onComplete:()=>{
+      capa.style.display='none';
+      startVideo();
+    }});
 });
 
-async function playVideo(){
+async function startVideo(){
+  // Mostrar loading se vídeo não tá pronto
+  const ready = video.readyState >= 3; // HAVE_FUTURE_DATA
+  if(!ready){
+    loading.style.display='flex';
+    await new Promise(r=>{
+      video.addEventListener('canplay',r,{once:true});
+      setTimeout(r,8000); // timeout 8s: fallback
+    });
+    gsap.to(loading,{opacity:0,duration:0.3,onComplete:()=>loading.style.display='none'});
+  }
+
+  videoContainer.style.display='block';
   video.muted=false;video.currentTime=0;
-  try{await video.play()}catch{video.muted=true;try{await video.play()}catch(_){}}
+
+  try{await video.play()}catch{
+    video.muted=true;
+    try{await video.play()}catch(_){
+      // Fallback: video não toca de jeito nenhum — mostra último frame
+      video.currentTime=video.duration||0;
+      showButtons();
+    }
+  }
+
   launchConfetti();
-  try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}catch{musica.muted=true;musica.play().catch(()=>{})}
+
+  // Música
+  try{await musica.play();gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'})}
+  catch{musica.muted=true;musica.play().catch(()=>{})}
   audioBtn.style.display='block';gsap.from(audioBtn,{scale:0,duration:0.5,delay:1,ease:'back.out(2)'});
-  setTimeout(showButtons,3000);
+
+  // Botões após vídeo terminar OU após timeout
+  const showAfterVideo=()=>showButtons();
+  video.addEventListener('ended',showAfterVideo,{once:true});
+  video.addEventListener('pause',()=>{if(video.currentTime>0)showAfterVideo()},{once:true});
+  setTimeout(showAfterVideo,15000); // safety: max 15s
 }
 
-// === ANIMAÇÃO DOS BOTÕES ===
 function showButtons(){
+  if(botoes.classList.contains('show'))return; // já mostrou
   const btns=botoes.querySelectorAll('a');
-  // Bounce in sequencial
   gsap.to(btns,{
     opacity:1,scale:1,duration:0.6,stagger:0.15,
     ease:'elastic.out(1,0.5)',
     onComplete:()=>{
       botoes.classList.add('show');
-      createButtonParticles();
+      // CTA hint
+      gsap.to(ctaHint,{opacity:1,duration:0.5,delay:0.5});
+      gsap.to(ctaHint,{opacity:0,duration:0.5,delay:4}); // desaparece após 4s
     }
   });
 }
 
-// Partículas flutuantes ao redor dos botões
-function createButtonParticles(){
-  const btns=botoes.querySelectorAll('a');
-  const colors=['#ffd700','#ff9800','#fff','#4caf50'];
-  btns.forEach(btn=>{
-    for(let i=0;i<6;i++){
-      const p=document.createElement('div');
-      p.className='btn-particle';
-      p.style.background=colors[i%colors.length];
-      p.style.left=btn.style.left||btn.offsetLeft+'px';
-      p.style.top=btn.style.top||btn.offsetTop+'px';
-      botoes.parentElement.appendChild(p);
-      // Posicionar relativo ao botão
-      const rect=btn.getBoundingClientRect();
-      const canvasRect=botoes.closest('.canvas').getBoundingClientRect();
-      const cx=rect.left-canvasRect.left+rect.width/2;
-      const cy=rect.top-canvasRect.top+rect.height/2;
-      p.style.left=cx+'px';p.style.top=cy+'px';
-      // Orbitar ao redor
-      const radius=Math.max(rect.width,rect.height)*0.7;
-      const angle=i*(Math.PI*2/6);
-      gsap.set(p,{opacity:0,scale:0});
-      gsap.to(p,{opacity:0.8,scale:1,duration:0.5,delay:i*0.1});
-      gsap.to(p,{
-        motionPath:{
-          path:[
-            {x:Math.cos(angle)*radius,y:Math.sin(angle)*radius},
-            {x:Math.cos(angle+Math.PI)*radius*0.6,y:Math.sin(angle+Math.PI)*radius*0.6},
-            {x:Math.cos(angle+Math.PI*2)*radius,y:Math.sin(angle+Math.PI*2)*radius}
-          ],
-          curviness:1.5
-        },
-        duration:3+Math.random()*2,repeat:-1,ease:'none'
-      });
-      gsap.to(p,{opacity:0.3,scale:0.5,duration:1.5,repeat:-1,yoyo:true,ease:'sine.inOut'});
-    }
-  });
-}
-
+// Audio
 audioBtn.addEventListener('click',()=>{
   if(musicaAtiva){musica.volume=0;audioBtn.textContent='🔇'}
   else{gsap.to(musica,{volume:0.7,duration:0.5});audioBtn.textContent='🔊'}
   musicaAtiva=!musicaAtiva;
 });
 
+// Overlay
 document.getElementById('btnImagem').addEventListener('click',(e)=>{
   e.preventDefault();overlay.style.display='flex';
   gsap.from(overlay,{opacity:0,duration:0.3});
@@ -265,6 +280,7 @@ overlay.querySelector('.close').addEventListener('click',()=>{
 });
 overlay.addEventListener('click',(e)=>{if(e.target===overlay)overlay.querySelector('.close').click()});
 
+// Confetti
 function launchConfetti(){
   const c=document.getElementById('confetti'),ctx=c.getContext('2d');
   c.width=innerWidth;c.height=innerHeight;
