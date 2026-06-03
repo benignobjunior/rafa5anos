@@ -124,6 +124,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 #audioBtn:hover{transform:scale(1.1)}
 
 #confetti{position:fixed;inset:0;z-index:90;pointer-events:none}
+
+/* Botão ativar som (fallback WhatsApp in-app browser) */
+#soundFix{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:500;display:none;
+  background:rgba(0,0,0,0.8);color:#fff;font-size:clamp(1rem,4vw,1.3rem);
+  font-weight:600;padding:1rem 2rem;border-radius:40px;
+  border:2px solid rgba(255,255,255,0.4);cursor:pointer;
+  backdrop-filter:blur(10px);
+  animation:pulse 2s infinite;
+}
 .explosion{position:fixed;inset:0;z-index:110;pointer-events:none}
 .exp-particle{position:absolute;border-radius:50%;pointer-events:none}
 </style>
@@ -145,7 +156,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 <div id="videoContainer">
   <div class="canvas">
     <video id="video" playsinline webkit-playsinline preload="auto">
-      <source src="assets/video.mov" type="video/mp4">
+      <source src="assets/video.mp4" type="video/mp4">
+      <source src="assets/video.mov" type="video/quicktime">
     </video>
     <div id="botoes">
 
@@ -166,6 +178,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 
 <button id="audioBtn" aria-label="Controlar música">🔊</button>
 <canvas id="confetti"></canvas>
+<button id="soundFix" onclick="fixSound()">🔊 Ativar som</button>
 <div class="explosion" id="explosion"></div>
 
 <script>
@@ -177,7 +190,7 @@ const botoes=document.getElementById('botoes');
 const overlay=document.getElementById('overlay');
 const audioBtn=document.getElementById('audioBtn');
 const explosion=document.getElementById('explosion');
-const musica=new Audio('assets/musica.aac');
+const musica=new Audio('assets/musica.mp3');
 musica.loop=true;musica.volume=0;
 let musicaAtiva=true;
 
@@ -203,7 +216,7 @@ for(let i=0;i<25;i++){
 // Abrir convite
 capa.addEventListener('click',async()=>{
   // Iniciar áudio SINCRONAMENTE no user gesture (iOS exige)
-  video.muted=false;video.volume=0;video.currentTime=0;
+  video.muted=false;video.volume=1;video.currentTime=0;
   video.play().catch(()=>{video.muted=true;video.play().catch(()=>{})});
   musica.play().catch(()=>{});
 
@@ -234,9 +247,9 @@ function explodeParticles(){
 // Mostrar vídeo (já está tocando desde o clique)
 function showVideo(){
   videoContainer.style.display='block';
-  // Fade in de volume
-  gsap.to(video,{volume:1,duration:0.5});
-  gsap.to(musica,{volume:0.7,duration:3,ease:'power1.in'});
+  // Volume do vídeo já está em 1 desde o clique
+  // Música: setar volume direto (sem GSAP async pra compatibilidade iOS)
+  musica.volume=0.7;
   launchConfetti();
   // Mostrar mãozinhas no segundo 30 do vídeo
   video.addEventListener('timeupdate',function(){
@@ -297,6 +310,20 @@ function launchConfetti(){
       if(p.life>0&&p.y<c.height+50){alive=true;ctx.save();ctx.globalAlpha=p.life;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}});
     if(alive&&++f<400)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);
   }();
+}
+
+
+// Fallback: se som não funcionou (WhatsApp in-app, etc), mostrar botão
+setTimeout(()=>{
+  if(video.muted||video.volume===0){
+    document.getElementById('soundFix').style.display='block';
+  }
+},2000);
+
+function fixSound(){
+  video.muted=false;video.volume=1;
+  musica.volume=0.7;musica.play().catch(()=>{});
+  document.getElementById('soundFix').style.display='none';
 }
 
 document.addEventListener('contextmenu',e=>e.preventDefault());
