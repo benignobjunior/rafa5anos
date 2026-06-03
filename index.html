@@ -191,7 +191,7 @@ const overlay=document.getElementById('overlay');
 const audioBtn=document.getElementById('audioBtn');
 const explosion=document.getElementById('explosion');
 const musica=new Audio('assets/musica.mp3');
-musica.loop=true;musica.volume=0;
+musica.loop=true;musica.volume=0.7;
 let musicaAtiva=true;
 
 // Countdown
@@ -247,9 +247,6 @@ function explodeParticles(){
 // Mostrar vídeo (já está tocando desde o clique)
 function showVideo(){
   videoContainer.style.display='block';
-  // Volume do vídeo já está em 1 desde o clique
-  // Música: setar volume direto (sem GSAP async pra compatibilidade iOS)
-  musica.volume=0.7;
   launchConfetti();
   // Mostrar mãozinhas no segundo 30 do vídeo
   video.addEventListener('timeupdate',function(){
@@ -315,7 +312,7 @@ function launchConfetti(){
 
 // Fallback: se som não funcionou (WhatsApp in-app, etc), mostrar botão
 setTimeout(()=>{
-  if(video.muted||video.volume===0){
+  if(video.muted||video.paused){
     document.getElementById('soundFix').style.display='block';
   }
 },2000);
