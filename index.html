@@ -102,7 +102,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:sys
 
 #confetti{position:fixed;inset:0;z-index:90;pointer-events:none}
 
-/* Botão ativar som - pequeno e discreto */
 #soundFix{
   position:fixed;bottom:max(env(safe-area-inset-bottom,12px),12px);
   left:12px;z-index:500;display:none;
@@ -186,11 +185,13 @@ for(let i=0;i<25;i++){
 
 // Abrir convite
 capa.addEventListener('click',async()=>{
+  // Desbloquear AudioContext (iOS exige no user gesture)
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){const ctx=new AC();await ctx.resume();if(typeof unmute==='function')unmute(ctx)}}catch(_){}
+
+  // Iniciar vídeo com som no user gesture
   video.muted=false;video.volume=1;video.currentTime=0;
   video.play().catch(()=>{video.muted=true;video.play().catch(()=>{})});
-  musica.play().catch(()=>{});
 
-  try{const AC=window.AudioContext||window.webkitAudioContext;if(AC){const ctx=new AC();await ctx.resume();if(typeof unmute==='function')unmute(ctx)}}catch(_){}
   if(navigator.vibrate)navigator.vibrate([50,30,100]);
   explodeParticles();
   gsap.timeline()
@@ -199,6 +200,14 @@ capa.addEventListener('click',async()=>{
     .to('.sparkle',{scale:4,opacity:0,duration:0.5,stagger:0.01,ease:'power2.out'},'<')
     .to('#capa .canvas img',{scale:1.2,duration:0.6,ease:'power2.in'},'<0.1')
     .to(capa,{opacity:0,duration:0.4,onComplete:()=>{capa.style.display='none';showVideo()}},'<0.3');
+});
+
+// Iniciar música SOMENTE após vídeo confirmar reprodução com som
+video.addEventListener('playing',function startMusica(){
+  if(!video.muted){
+    musica.play().catch(()=>{});
+    video.removeEventListener('playing',startMusica);
+  }
 });
 
 function explodeParticles(){
@@ -223,6 +232,20 @@ function showVideo(){
       document.querySelectorAll('.hand').forEach(h=>gsap.to(h,{opacity:1,duration:0.5}));
     }
   });
+}
+
+// Fallback: se após 3s o vídeo está muted, mostrar botão discreto
+setTimeout(()=>{
+  if(video.muted){
+    document.getElementById('soundFix').style.display='block';
+  }
+},3000);
+
+function fixSound(){
+  video.muted=false;video.volume=1;
+  video.play().catch(()=>{});
+  musica.play().catch(()=>{});
+  document.getElementById('soundFix').style.display='none';
 }
 
 // Shake easter egg
@@ -263,19 +286,6 @@ function launchConfetti(){
       if(p.life>0&&p.y<c.height+50){alive=true;ctx.save();ctx.globalAlpha=p.life;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}});
     if(alive&&++f<400)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);
   }();
-}
-
-// Fallback: se som não funcionou, mostrar botão discreto
-setTimeout(()=>{
-  if(video.muted||video.paused){
-    document.getElementById('soundFix').style.display='block';
-  }
-},2000);
-
-function fixSound(){
-  video.muted=false;video.volume=1;
-  musica.volume=0.7;musica.play().catch(()=>{});
-  document.getElementById('soundFix').style.display='none';
 }
 
 document.addEventListener('contextmenu',e=>e.preventDefault());
